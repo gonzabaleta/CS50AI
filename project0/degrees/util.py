@@ -26,6 +26,10 @@ class StackFrontier():
             self.frontier = self.frontier[:-1]
             return node
 
+    def is_goal(self, source, target):
+        return source == target
+
+
 
 class QueueFrontier(StackFrontier):
 
