@@ -115,9 +115,6 @@ def sample_pagerank(corpus, damping_factor, n):
         pagerank[page] /= n
     
     return pagerank
-        
-
-
 
 
 def iterate_pagerank(corpus, damping_factor):
@@ -129,10 +126,61 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    distribution = {}
-    for page in corpus:
-        distribution[page] = 1 / len(corpus)
+    corpus_length = len(corpus)
+    DESIRED_VARIAION = 0.001
 
+    # Keep track of the pagerank of each page
+    pageranks = {}
+
+    # Load all parents of each page so we can look them up easier
+    # This dictionary keeps tracks, for each page, all of the pages that link to it.
+    parents = {}
+
+    # Fill the pageranks and parents dictionaries
+    for page in corpus:
+        pageranks[page] = 1 / corpus_length # calculate initial pagerank
+        parents[page] = set() # each parent page starts as an empty set
+
+        # Fill the parents dictionary
+        for parent_page in corpus:
+            if page in corpus[parent_page]:
+                parents[page].add(parent_page)
+
+    while True:
+        # keep track of how much each pagerank varies in each iteration 
+        is_desired_variation = {}
+
+        for page in corpus:
+            # Get basic pagerank (1 - d) / N
+            pagerank = (1 - damping_factor) / corpus_length
+
+            # Itearate each parent if page (each page that links to this page)
+            for parent in parents[page]:
+                # Calculate pagerank based on parent pages d * (PR(i) / NumLinks(i))
+                pagerank += damping_factor * (pageranks[parent] / len(corpus[parent]))
+
+            # Get the variation of the current pagerank (how much it varied from last calculated pagerank)
+            variation = abs(pageranks[page] - pagerank)
+
+
+            if (variation <= DESIRED_VARIAION):
+                is_desired_variation[page] = True
+            else:
+                is_desired_variation[page] = False
+
+            pageranks[page] = pagerank
+
+        # Check that all pages varied by less than 0.001
+        should_continue = False
+        for page in is_desired_variation:
+            if is_desired_variation[page] == False:
+                should_continue = True
+
+        # If not, continue calculating pageranks. Else, break the loop
+        if should_continue: continue 
+        else: break
+
+    return pageranks
 
 if __name__ == "__main__":
     main()
