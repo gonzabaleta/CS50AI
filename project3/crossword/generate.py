@@ -90,8 +90,13 @@ class CrosswordCreator():
         Enforce node and arc consistency, and then solve the CSP.
         """
         self.enforce_node_consistency()
-        self.ac3()
-        return self.backtrack(dict())
+        for v1 in self.domains:
+            for v2 in self.domains:
+                if v1 == v2:
+                    continue
+                self.revise(v1, v2)
+        # self.ac3()
+        # return self.backtrack(dict())
 
     def enforce_node_consistency(self):
         """
@@ -99,7 +104,14 @@ class CrosswordCreator():
         (Remove any values that are inconsistent with a variable's unary
          constraints; in this case, the length of the word.)
         """
-        raise NotImplementedError
+        # Check that each domain is consistent with the variable's length
+        for var in self.domains:
+            possible_words = set()
+            for word in self.domains[var]:
+                if len(word) == var.length:
+                    possible_words.add(word)
+            self.domains[var] = possible_words
+    
 
     def revise(self, x, y):
         """
@@ -110,7 +122,34 @@ class CrosswordCreator():
         Return True if a revision was made to the domain of `x`; return
         False if no revision was made.
         """
-        raise NotImplementedError
+        # Initialize variables
+        overlap = self.crossword.overlaps[x, y]
+        revised = False
+
+        # If the two words don't overlap, skip to the next word
+        if not overlap:
+            return revised
+
+        # Copy the domain of x
+        possible_x = self.domains[x].copy()
+
+        # For each word in x domain
+        for x_word in self.domains[x]:
+            possible_y = set() # Initialize empty set of possible values in y domain that are consistent with overlap
+
+            # For each word in Y domain
+            for y_word in self.domains[y]:
+                # If the overlap is consistent and they aren't the same words, add y_word to the set
+                if x_word[overlap[0]] == y_word[overlap[1]] and x_word != y_word:
+                    possible_y.add(y_word)
+
+            # If no possible values in Y for x, remove x from domain
+            if not len(possible_y):
+                possible_x.remove(x_word)
+                revised = True
+        
+        self.domains[x] = possible_x
+        
 
     def ac3(self, arcs=None):
         """
