@@ -14,7 +14,7 @@ TEST_SIZE = 0.4
 
 
 def main():
-
+    print("RUNNING")
     # Check command-line arguments
     if len(sys.argv) not in [2, 3]:
         sys.exit("Usage: python traffic.py data_directory [model.h5]")
@@ -58,7 +58,8 @@ def load_data(data_dir):
     be a list of integer labels, representing the categories for each of the
     corresponding `images`.
     """
-    raise NotImplementedError
+    image = cv2.imread("./gtsrb/0/00000_00000.ppm", mode="RGB")
+    print(type(image))
 
 
 def get_model():
