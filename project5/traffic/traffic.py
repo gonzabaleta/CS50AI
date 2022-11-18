@@ -58,8 +58,19 @@ def load_data(data_dir):
     be a list of integer labels, representing the categories for each of the
     corresponding `images`.
     """
-    image = cv2.imread("./gtsrb/0/00000_00000.ppm", mode="RGB")
-    print(type(image))
+    data = (list(), list())
+
+    for category in range(NUM_CATEGORIES - 1):
+        for filename in os.listdir(os.path.join(data_dir, str(category))):
+            print(filename)
+            f = os.path.join(data_dir, str(category), filename)
+            image = cv2.imread(f)
+            resized = cv2.resize(image, (IMG_WIDTH, IMG_HEIGHT))
+            print(resized.shape)
+            data[0].append(resized)
+            data[1].append(category)
+
+    return data
 
 
 def get_model():
