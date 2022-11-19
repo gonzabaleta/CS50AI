@@ -14,7 +14,6 @@ TEST_SIZE = 0.4
 
 
 def main():
-    print("RUNNING")
     # Check command-line arguments
     if len(sys.argv) not in [2, 3]:
         sys.exit("Usage: python traffic.py data_directory [model.h5]")
@@ -60,13 +59,11 @@ def load_data(data_dir):
     """
     data = (list(), list())
 
-    for category in range(NUM_CATEGORIES - 1):
+    for category in range(NUM_CATEGORIES):
         for filename in os.listdir(os.path.join(data_dir, str(category))):
-            print(filename)
             f = os.path.join(data_dir, str(category), filename)
             image = cv2.imread(f)
             resized = cv2.resize(image, (IMG_WIDTH, IMG_HEIGHT))
-            print(resized.shape)
             data[0].append(resized)
             data[1].append(category)
 
@@ -79,7 +76,26 @@ def get_model():
     `input_shape` of the first layer is `(IMG_WIDTH, IMG_HEIGHT, 3)`.
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
-    raise NotImplementedError
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Conv2D(
+            200, (7, 7), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+        ),
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+        tf.keras.layers.Conv2D(250, (4, 4), activation="relu"),
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(400, activation="relu"),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(NUM_CATEGORIES, activation="softmax")
+
+    ])
+
+    model.summary()
+
+    model.compile(optimizer="adam",
+                  loss="categorical_crossentropy", metrics=["accuracy"])
+
+    return model
 
 
 if __name__ == "__main__":
