@@ -73,7 +73,7 @@ def preprocess(sentence):
 
     for word in words:
         if any(char.isalpha() for char in word):
-            alpha_words.append(word)
+            alpha_words.append(word.lower())
 
     return alpha_words
 
@@ -85,7 +85,18 @@ def np_chunk(tree):
     whose label is "NP" that does not itself contain any other
     noun phrases as subtrees.
     """
-    raise NotImplementedError
+    noun_phrases = list()
+    for subtree in tree.subtrees():
+        if subtree.label() == "NP":
+            is_noun_phrase = True
+            for subsubtree in subtree.subtrees():
+                # print(subsubtree)
+                # print(subsubtree.height())
+                if subsubtree != subtree and subsubtree.label() == "NP":
+                    is_noun_phrase = False
+            if is_noun_phrase:
+                noun_phrases.append(subtree)
+    return noun_phrases
 
 
 if __name__ == "__main__":
